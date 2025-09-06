@@ -1,0 +1,15 @@
+[project]
+name = "copyright-fixer"
+version = "0.1.0"
+description = "CLI to maintain copyright notices in code"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = []
+authors = [{ name = "Aditya Ghidora", email = "adityaghidora+dev@gmail.com" }]
+license = { file = "LICENSE" }
+
+[project.urls]
+Homepage = "https://github.com/kurayami07734/copyright-fixer"
+
+[project.scripts]
+copyright_fixer = "copyright_fixer:main"
