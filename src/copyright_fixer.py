@@ -1,6 +1,8 @@
 import argparse as agp
 from dataclasses import dataclass
-from typing import List, Optional, Protocol
+from datetime import date
+from typing import List, Protocol
+import re
 
 
 class CopyrightFixerArgs(Protocol):
@@ -12,16 +14,22 @@ class CopyrightFixerArgs(Protocol):
 
 
 @dataclass
+class Line:
+    line_number: int
+    content: str
+
+
+@dataclass
 class File:
     filename: str
-    comment_lines: list[str]
+    comment_lines: list[Line]
 
 
 @dataclass
 class CheckResult:
     ok: bool
     filename: str
-    fix: Optional[str]
+    line_number: int
 
 
 def parse_args() -> CopyrightFixerArgs:
@@ -66,10 +74,10 @@ def read_files(args: CopyrightFixerArgs) -> list[File]:
         file = File(filename=filename, comment_lines=[])
         comment_lines = []
 
-        with open(filename, mode="r") as file:
-            for line in file.readlines():
+        with open(filename, mode="r") as f:
+            for idx, line in enumerate(f.readlines()):
                 if line.startswith(args.comment_symbol):
-                    comment_lines.append(line)
+                    comment_lines.append(Line(line_number=idx + 1, content=line))
 
         file.comment_lines = comment_lines
 
@@ -78,8 +86,32 @@ def read_files(args: CopyrightFixerArgs) -> list[File]:
     return files
 
 
-def check_files(file: list[File], args: CopyrightFixerArgs) -> list[CheckResult]:
-    pass
+def check_files(files: list[File], args: CopyrightFixerArgs) -> list[CheckResult]:
+    current_year = date.today().year
+    escaped_company_name = re.escape(args.company_name)
+
+    regex_pattern = rf"^\s*{re.escape(args.comment_symbol)}\s*copyright\s+\(c\)\s+(\d{{4}}(?:-\d{{4}})?)\s+{escaped_company_name}\s*$"
+
+    results = []
+
+    for file in files:
+        result = CheckResult(filename=file.filename, line_number=1, ok=False)
+        for line in file.comment_lines:
+            match = re.match(regex_pattern, line.content.strip(), re.IGNORECASE)
+            if match:
+                year_part = match.group(1)
+                if "-" in year_part:
+                    start_year, end_year = map(int, year_part.split("-"))
+                    if end_year == current_year:
+                        result.ok = True
+                else:
+                    start_year = int(year_part)
+                    if start_year == current_year:
+                        result.ok = True
+                break
+        results.append(result)
+
+    return results
 
 
 def write_fixes(results: list[CheckResult], args: CopyrightFixerArgs):
