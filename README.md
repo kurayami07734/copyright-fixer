@@ -1,47 +1,28 @@
-# Copyright Fixer 
+# Copyright Fixer
 
-CLI to keep the copyright notices updated automatically
+A simple and efficient CLI tool to keep copyright notices up to date automatically in your code files as part of the pre-commit process.
 
-## Steps to run locally
+---
 
-1. create a test git repo at the same level as this project
+## 🚀 Features
 
-```bash
-cd ..
-mkdir test-git-repo
-cd test-git-repo
-git init .
-```
+✔ Detect outdated copyright years and update them with the current year  
+✔ Enforce year ranges like `2020-2025`  
+✔ Automatically insert missing copyright lines
 
-2. setup pre-commit (This may require setting up venv with pre-commit)
+---
 
-```bash
-pip install pre-commit
-```
+## 🎬 Demo
 
-3. Add .pre-commit-config.yaml 
+Check out this video where we walk through setting up and using Copyright Fixer in a test repository.
 
-```yaml
-repos:
-  - repo: ../copyright-fixer
-    rev: <latest_commit_hash>
-    hooks:
-       - id: copyright-fixer
-         args: ["-n", "Acme, Inc.", "-s", "#"]
-```
 
-4. install pre-commit hash
+https://github.com/user-attachments/assets/250e7065-a769-4a87-b839-7b2adfaaad2d
 
-```bash
-pre-commit install
-```
+---
 
-5. run pre-commit 
-```bash
-pre-commit run --verbose
-```
+### 💡 Contributing
 
-### Note
 
-Everytime you make any changes, commit them and update the `rev` in `.pre-commit-config.yaml`
-Stage the change in the `.pre-commit-config.yaml` and then run the pre-commit
+Contributions are welcome! Feel free to open issues, submit pull requests, or suggest improvements. 
+Please refer to the [contribution guide](./CONTRIBUTING.md)
