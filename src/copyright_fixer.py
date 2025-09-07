@@ -115,7 +115,47 @@ def check_files(files: list[File], args: CopyrightFixerArgs) -> list[CheckResult
 
 
 def write_fixes(results: list[CheckResult], args: CopyrightFixerArgs):
-    pass
+    current_year = date.today().year
+
+    for res in results:
+        with open(res.filename, "r") as f:
+            lines = f.readlines()
+
+        escaped_company_name = args.company_name
+        regex_pattern = rf"^\s*{re.escape(args.comment_symbol)}\s*copyright\s+\(c\)\s+(\d{{4}}(?:-\d{{4}})?)\s+{re.escape(escaped_company_name)}\s*$"
+
+        updated = False
+        found = False
+
+        for i, line in enumerate(lines):
+            match = re.match(regex_pattern, line.strip(), re.IGNORECASE)
+            if match:
+                found = True
+                year_part = match.group(1)
+                if "-" in year_part:
+                    start_year, end_year = map(int, year_part.split("-"))
+                    if end_year != current_year:
+                        lines[i] = (
+                            f"{args.comment_symbol} Copyright (c) {start_year}-{current_year} {escaped_company_name}\n"
+                        )
+                        updated = True
+                else:
+                    start_year = int(year_part)
+                    if start_year != current_year:
+                        lines[i] = (
+                            f"{args.comment_symbol} Copyright (c) {start_year}-{current_year} {escaped_company_name}\n"
+                        )
+                        updated = True
+                break
+
+        if not found:
+            new_line = f"{args.comment_symbol} Copyright (c) {current_year} {escaped_company_name}\n"
+            lines.insert(0, new_line)
+            updated = True
+
+        if updated:
+            with open(res.filename, "w") as f:
+                f.writelines(lines)
 
 
 def main():
